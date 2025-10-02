@@ -1,0 +1,604 @@
+import { track, effect } from 'ripple';
+import * as router from "route-machine"
+import { normalizeProps, useMachine } from "zag-ripple"
+
+export component App() {
+  // State for testing various router features
+  const isAuthenticated = track(false)
+  const hasUnsavedChanges = track(false)
+  const useHashRouting = track(false)
+  const navigationLog = track<string[]>([])
+
+  // Helper functions
+  const showLoginModal = () => {
+    alert("Please log in to access this area")
+  }
+
+  const logNavigation = (message: string) => {
+    @navigationLog = [...@navigationLog, `${new Date().toLocaleTimeString()}: ${message}`]
+  }
+
+	const service = useMachine(
+    router.machine,{
+      id: "app-router",
+      hashRouting: useHashRouting, // Toggle between hash and history routing
+      basePath: "", // Can be set for subdirectory deployment
+      routes: [
+        { path: "/", name: "home", meta: { title: "Home", requiresAuth: false } },
+        { path: "/about", name: "about", meta: { title: "About", requiresAuth: false } },
+        { path: "/search", name: "search", meta: { title: "Search", requiresAuth: false } },
+        { path: "/users/:id", name: "user", meta: { title: "User Profile", requiresAuth: false } },
+        { path: "/users/:id/settings", name: "user-settings", meta: { title: "User Settings", requiresAuth: true } },
+        { path: "/admin", name: "admin", meta: { title: "Admin Panel", requiresAuth: true } },
+        { path: "/admin/users", name: "admin-users", meta: { title: "Admin - Users", requiresAuth: true } },
+        { path: "/login", name: "login", meta: { title: "Login", requiresAuth: false } },
+        { path: "/protected", name: "protected", meta: { title: "Protected Area", requiresAuth: true } },
+        { path: "*", name: "not-found", meta: { title: "Page Not Found", requiresAuth: false } }
+      ],
+      
+      // Navigation guard - runs before navigation
+      onBeforeNavigate: (details: any) => {
+        logNavigation(`Before navigate: ${details.from?.pathname || 'initial'} → ${details.to.pathname}`)
+        
+        // Example: Prevent navigation to protected routes without auth
+        const routeMeta = details.to.meta
+        console.log("details", details)
+        if (routeMeta?.requiresAuth && !@isAuthenticated) {
+          showLoginModal()
+          logNavigation(`Navigation blocked: Authentication required for ${details.to.pathname}`)
+          return false
+        }
+
+        // Example: Confirm navigation when there are unsaved changes
+        if (@hasUnsavedChanges && details.from?.pathname && details.from.pathname !== details.to.pathname) {
+          const confirmed = confirm("You have unsaved changes. Are you sure you want to leave?")
+          if (!confirmed) {
+            return false
+            logNavigation(`Navigation cancelled: User chose to stay on ${details.from.pathname}`)
+          }
+          @hasUnsavedChanges = false
+        }
+
+        // Example: Redirect logic
+        if (details.to.pathname === "/old-path") {
+          return false
+          // Would trigger navigation to new path
+          logNavigation(`Redirecting from /old-path to /new-path`)
+        }
+      },
+
+      // Runs when navigation starts
+      onNavigationStart: () => {
+        logNavigation("Navigation started - loading...")
+      },
+
+      // Runs when navigation completes
+      onNavigate: (details: any) => {
+        
+        // Update document title based on route meta
+        const title = details.to.meta?.title || "App"
+        document.title = title
+
+        // Analytics tracking
+        logNavigation(`Navigation completed: ${details.from?.pathname || 'initial'} → ${details.to.pathname}`)
+        
+        // Example: Track page views
+        if (typeof gtag !== 'undefined') {
+          // gtag('config', 'GA_MEASUREMENT_ID', { page_path: details.to.pathname })
+        }
+      },
+
+      // Runs when navigation ends (after all lifecycle hooks)
+      onNavigationEnd: () => {
+        logNavigation("Navigation lifecycle completed")
+      }
+    }
+  )
+
+  const api = track(() => router.connect(service, normalizeProps))
+
+  // Helper functions for programmatic navigation
+  const navigateTo = (path: string, state?: any) => {
+    @api.navigate(path, state)
+  }
+
+  const pushRoute = (path: string, state?: any) => {
+    @api.push(path, state)
+  }
+
+  const replaceRoute = (path: string) => {
+    @api.replace(path)
+  }
+
+  <div {...@api.getRootProps()}>
+    {/* Router Configuration Controls */}
+    <div style="background: #f5f5f5; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+      <h3>{"Router Configuration & Testing"}</h3>
+      <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.5rem;">
+        <label>
+          <input 
+            type="checkbox" 
+            checked={@isAuthenticated}
+            onChange={(e: any) => @isAuthenticated = e.target.checked}
+          />
+          {" Authenticated"}
+        </label>
+        <label>
+          <input 
+            type="checkbox" 
+            checked={@hasUnsavedChanges}
+            onChange={(e: any) => @hasUnsavedChanges = e.target.checked}
+          />
+          {" Has Unsaved Changes"}
+        </label>
+        <label>
+          <input 
+            type="checkbox" 
+            checked={@useHashRouting}
+            onChange={(e: any) => {
+              @useHashRouting = e.target.checked
+              alert("Hash routing toggle requires page reload to take effect")
+            }}
+          />
+          {" Use Hash Routing"}
+        </label>
+      </div>
+      
+      {/* Programmatic Navigation Examples */}
+      <div style="margin-top: 1rem;">
+        <strong>{"Programmatic Navigation:"}</strong>
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+          <button onClick={() => pushRoute("/search?q=ripple&category=framework")}>
+            {"Search with Query"}
+          </button>
+          <button onClick={() => pushRoute("/users/456", { from: "programmatic" })}>
+            {"User 456 with State"}
+          </button>
+          <button onClick={() => replaceRoute("/login")}>
+            {"Replace with Login"}
+          </button>
+          <button onClick={() => navigateTo("/admin")}>
+            {"Navigate to Admin (Protected)"}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  
+
+    <nav style="background: #333; padding: 1rem; margin-bottom: 1rem;">
+      <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        {/* Basic Navigation Links */}
+        <a {...@api.getLinkProps({ to: "/" })} style="color: white; text-decoration: none;">
+          {"🏠 Home"}
+        </a>
+        <a {...@api.getLinkProps({ to: "/about" })} style="color: white; text-decoration: none;">
+          {"ℹ️ About"}
+        </a>
+        <a {...@api.getLinkProps({ to: "/search" })} style="color: white; text-decoration: none;">
+          {"🔍 Search"}
+        </a>
+        <a {...@api.getLinkProps({ to: "/users/123" })} style="color: white; text-decoration: none;">
+          {"👤 User 123"}
+        </a>
+        <a {...@api.getLinkProps({ to: "/users/123/settings" })} style="color: white; text-decoration: none;">
+          {"⚙️ User Settings"}
+        </a>
+        <a {...@api.getLinkProps({ to: "/admin" })} style="color: white; text-decoration: none;">
+          {"🔒 Admin"}
+        </a>
+        <a {...@api.getLinkProps({ to: "/protected" })} style="color: white; text-decoration: none;">
+          {"🛡️ Protected"}
+        </a>
+        <a {...@api.getLinkProps({ to: "/login" })} style="color: white; text-decoration: none;">
+          {"🔑 Login"}
+        </a>
+        <a {...@api.getLinkProps({ to: "/nonexistent" })} style="color: white; text-decoration: none;">
+          {"❌ 404 Page"}
+        </a>
+        
+        {/* Navigation Controls */}
+        <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+          <button onClick={() => @api.back()} disabled={!@api.canGoBack} style="padding: 0.25rem 0.5rem;">
+            {"← Back"}
+    </button>
+          <button onClick={() => @api.forward()} disabled={!@api.canGoForward} style="padding: 0.25rem 0.5rem;">
+            {"Forward →"}
+    </button>
+        </div>
+      </div>
+      
+      {/* Active Route Indicators */}
+      <div style="margin-top: 1rem; font-size: 0.9rem; color: #ccc;">
+        <span>{"Active checks: "}</span>
+        <span style="margin-right: 1rem;">
+          {"Home: " + (@api.isActive("/") ? "✓" : "✗")}
+        </span>
+        <span style="margin-right: 1rem;">
+          {"Users section: " + (@api.isActive("/users", false) ? "✓" : "✗")}
+        </span>
+        <span>
+          {"Admin section: " + (@api.isActive("/admin", false) ? "✓" : "✗")}
+        </span>
+      </div>
+  </nav>
+
+    <main {...@api.getOutletProps()} style="padding: 1rem;">
+      {/* Navigation Loading State */}
+    if(@api.navigating) {
+        <div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; text-align: center;">
+          {"🔄 Navigating..."}
+        </div>
+    }
+
+      {/* Route Matching with all new routes */}
+    if(@api.location.pathname === "/") {
+      <HomePage />
+    }
+    if(@api.location.pathname === "/about") {
+      <AboutPage />
+    }
+      if(@api.location.pathname === "/search") {
+        <SearchPage query={@api.location.query} />
+      }
+      if(@api.location.pathname === "/login") {
+        <LoginPage onLogin={() => { @isAuthenticated = true }} />
+      }
+      if(@api.location.pathname === "/admin") {
+        <AdminPage />
+      }
+      if(@api.location.pathname === "/admin/users") {
+        <AdminUsersPage />
+      }
+      if(@api.location.pathname === "/protected") {
+        <ProtectedPage />
+    }
+    if(@api.location.pathname.match(/^\/users\/(\d+)$/)) {
+      <UserPage userId={@api.location.params.id} />
+    }
+    if(@api.location.pathname.match(/^\/users\/(\d+)\/settings$/)) {
+      <UserSettingsPage userId={@api.location.params.id} />
+    }
+      
+      {/* 404 - Catch-all route */}
+      if(@api.currentRouteName === "not-found") {
+        <NotFoundPage />
+      }
+  </main>
+
+    {/* Comprehensive Router State Display */}
+    <footer style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 1rem; margin-top: 2rem; border-radius: 4px;">
+      <h3>{"Router State Information"}</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        
+        {/* Basic Route Info */}
+        <div>
+          <h4>{"Route Info"}</h4>
+          <p><strong>{"Current route name: "}</strong>{@api.currentRouteName || "unknown"}</p>
+          <p><strong>{"Path: "}</strong>{@api.location.pathname}</p>
+          <p><strong>{"Hash: "}</strong>{@api.location.hash || "(none)"}</p>
+    if(@api.location.params.id) {
+            <p><strong>{"User ID param: "}</strong>{@api.location.params.id}</p>
+          }
+        </div>
+
+        {/* Query Parameters */}
+        <div>
+          <h4>{"Query Parameters"}</h4>
+          if(Object.keys(@api.location.query).length > 0) {
+            for(const key of Object.keys(@api.location.query)) {
+              <p><strong>{key + ": "}</strong>{String(@api.location.query[key])}</p>
+            }
+          } else {
+            <p>{"No query parameters"}</p>
+          }
+        </div>
+
+        {/* Navigation State */}
+        <div>
+          <h4>{"Navigation State"}</h4>
+          <p><strong>{"Can go back: "}</strong>{@api.canGoBack ? "Yes" : "No"}</p>
+          <p><strong>{"Can go forward: "}</strong>{@api.canGoForward ? "Yes" : "No"}</p>
+          <p><strong>{"Currently navigating: "}</strong>{@api.navigating ? "Yes" : "No"}</p>
+</div>
+	
+        {/* Route Meta */}
+        <div>
+          <h4>{"Route Meta"}</h4>
+          if(@api.location.meta) {
+            for(const key of Object.keys(@api.location.meta)) {
+              <p><strong>{key + ": "}</strong>{String(@api.location.meta[key])}</p>
+            }
+          } else {
+            <p>{"No route meta"}</p>
+          }
+        </div>
+      </div>
+    </footer>
+
+    {/* Navigation Log */}
+    if(@navigationLog.length > 0) {
+      <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 1rem; margin-top: 1rem; border-radius: 4px;">
+        <h4>{"Navigation Log"}</h4>
+        <div style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.9rem;">
+          for(const logEntry of @navigationLog) {
+            <div>{logEntry}</div>
+          }
+        </div>
+        <button 
+          onClick={() => @navigationLog = []}
+          style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;"
+        >
+          {"Clear Log"}
+        </button>
+      </div>
+    }
+  </div>
+}
+
+
+
+// Page Components with Router Features
+
+component HomePage() {
+  <div>
+    <h1>{"🏠 Home Page"}</h1>
+    <p>{"Welcome to the comprehensive @zag-js/router demo in Ripple!"}</p>
+    
+    <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+      <h3>{"Quick Navigation Tests:"}</h3>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="/search?q=homepage&source=home" style="color: #1976d2;">{"🔍 Search with Query"}</a>
+        <a href="/users/789" style="color: #1976d2;">{"👤 User 789"}</a>
+        <a href="/admin" style="color: #1976d2;">{"🔒 Admin (Protected)"}</a>
+      </div>
+    </div>
+
+    <div>
+      <h3>{"Features Demonstrated:"}</h3>
+      <ul>
+        <li>{"✅ Basic routing with named routes"}</li>
+        <li>{"✅ Route parameters (/users/:id)"}</li>
+        <li>{"✅ Query parameters (?q=search&category=test)"}</li>
+        <li>{"✅ Navigation guards (authentication checks)"}</li>
+        <li>{"✅ Route meta data"}</li>
+        <li>{"✅ Programmatic navigation"}</li>
+        <li>{"✅ History management (back/forward)"}</li>
+        <li>{"✅ Active route detection"}</li>
+        <li>{"✅ Loading states during navigation"}</li>
+      </ul>
+    </div>
+    </div>
+}
+
+component AboutPage() {
+    <div>
+    <h1>{"ℹ️ About Page"}</h1>
+    <p>{"This page demonstrates @zag-js/router integration with Ripple framework."}</p>
+    
+    <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+      <h3>{"Router Features:"}</h3>
+      <ul>
+        <li><strong>{"Navigation Guards:"}</strong>{" onBeforeNavigate hook for access control"}</li>
+        <li><strong>{"Lifecycle Hooks:"}</strong>{" onNavigationStart, onNavigate, onNavigationEnd"}</li>
+        <li><strong>{"Route Matching:"}</strong>{" Path parameters, wildcards, and exact matching"}</li>
+        <li><strong>{"State Management:"}</strong>{" Navigation state, loading indicators"}</li>
+        <li><strong>{"Browser Integration:"}</strong>{" History API, hash routing option"}</li>
+      </ul>
+    </div>
+
+    <p>{"Try navigating around to see all the features in action!"}</p>
+  </div>
+}
+
+component SearchPage({ query }: { query: Record<string, any> }) {
+  <div>
+    <h1>{"🔍 Search Page"}</h1>
+    
+    <div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+      <h3>{"Query Parameters Demo:"}</h3>
+      if(Object.keys(query).length > 0) {
+        <div>
+          <p><strong>{"Parsed Query Parameters:"}</strong></p>
+          <ul>
+            for(const key of Object.keys(query)) {
+              <li><strong>{key + ":"}</strong>{" " + String(query[key])}</li>
+            }
+          </ul>
+        </div>
+      } else {
+        <p>{"No query parameters found. Try: "}<a href="/search?q=test&category=demo&tags=router&tags=ripple" style="color: #1976d2;">{"Search with multiple params"}</a></p>
+      }
+    </div>
+
+    <div>
+      <h3>{"Test Different Query Combinations:"}</h3>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+        <a href="/search?q=ripple" style="color: #1976d2;">{"Single param"}</a>
+        <a href="/search?q=router&framework=ripple" style="color: #1976d2;">{"Multiple params"}</a>
+        <a href="/search?tags=frontend&tags=routing&tags=zag" style="color: #1976d2;">{"Array params"}</a>
+        <a href="/search?q=test&page=2&sort=date&order=desc" style="color: #1976d2;">{"Complex query"}</a>
+      </div>
+    </div>
+  </div>
+}
+
+component LoginPage({ onLogin }: { onLogin: () => void }) {
+  <div>
+    <h1>{"🔑 Login Page"}</h1>
+    
+    <div style="background: #f3e5f5; border: 1px solid #9c27b0; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+      <p>{"This page demonstrates authentication flow with router guards."}</p>
+      <p>{"Click 'Login' to authenticate and unlock protected routes."}</p>
+      
+      <button 
+        onClick={onLogin}
+        style="background: #4caf50; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin-top: 1rem;"
+      >
+        {"🚀 Login & Authenticate"}
+      </button>
+    </div>
+
+    <div>
+      <h3>{"Test Authentication Flow:"}</h3>
+      <ol>
+        <li>{"Try clicking "}<a href="/admin" style="color: #1976d2;">{"Admin"}</a>{" or "}<a href="/protected" style="color: #1976d2;">{"Protected"}</a>{" (should be blocked)"}</li>
+        <li>{"Click the Login button above"}</li>
+        <li>{"Now try the protected routes again (should work)"}</li>
+      </ol>
+    </div>
+  </div>
+}
+
+component AdminPage() {
+  <div>
+    <h1>{"🔒 Admin Panel"}</h1>
+    
+    <div style="background: #ffebee; border: 1px solid #f44336; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+      <p>{"🎉 Success! You're authenticated and can access this protected route."}</p>
+    </div>
+
+    <div>
+      <h3>{"Admin Navigation:"}</h3>
+      <ul>
+        <li><a href="/admin/users" style="color: #1976d2;">{"👥 Manage Users"}</a></li>
+        <li><a href="/protected" style="color: #1976d2;">{"🛡️ Other Protected Area"}</a></li>
+      </ul>
+    </div>
+
+    <div style="margin-top: 2rem;">
+      <h3>{"Router Guard Demo:"}</h3>
+      <p>{"This page is protected by the onBeforeNavigate guard. It checks:"}</p>
+      <ul>
+        <li>{"Route meta: requiresAuth === true"}</li>
+        <li>{"Authentication state"}</li>
+        <li>{"Prevents navigation if not authenticated"}</li>
+        <li>{"Shows login modal when blocked"}</li>
+      </ul>
+    </div>
+  </div>
+}
+
+component AdminUsersPage() {
+  <div>
+    <h1>{"👥 Admin - User Management"}</h1>
+    
+    <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+      <p>{"Nested admin route demonstrating hierarchical routing structure."}</p>
+    </div>
+
+    <div>
+      <h3>{"Sample User List:"}</h3>
+      <div style="display: grid; gap: 0.5rem; margin-top: 1rem;">
+        <a href="/users/101" style="padding: 0.5rem; background: #f5f5f5; color: #1976d2; text-decoration: none; border-radius: 3px;">
+          {"👤 User 101 - John Doe"}
+        </a>
+        <a href="/users/102" style="padding: 0.5rem; background: #f5f5f5; color: #1976d2; text-decoration: none; border-radius: 3px;">
+          {"👤 User 102 - Jane Smith"}
+        </a>
+        <a href="/users/103/settings" style="padding: 0.5rem; background: #f5f5f5; color: #1976d2; text-decoration: none; border-radius: 3px;">
+          {"⚙️ User 103 Settings - Direct Link"}
+        </a>
+      </div>
+    </div>
+  </div>
+}
+
+component ProtectedPage() {
+  <div>
+    <h1>{"🛡️ Protected Area"}</h1>
+    
+    <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+      <p>{"Another protected route to test navigation guards."}</p>
+      <p>{"You can only see this content when authenticated!"}</p>
+    </div>
+
+    <div>
+      <h3>{"Guard Features Demonstrated:"}</h3>
+      <ul>
+        <li>{"✅ Route-level authentication"}</li>
+        <li>{"✅ Automatic redirect prevention"}</li>
+        <li>{"✅ Modal-based user feedback"}</li>
+        <li>{"✅ Navigation logging"}</li>
+      </ul>
+    </div>
+    </div>
+}
+
+component UserPage({ userId }: { userId: string }) {
+    <div>
+    <h1>{"👤 User Profile: " + userId}</h1>
+    
+    <div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+      <p>{"Route Parameter Demo: User ID = " + userId}</p>
+      <p>{"This demonstrates dynamic route parameters with /users/:id pattern."}</p>
+    </div>
+
+    <div>
+      <h3>{"User Actions:"}</h3>
+      <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+        <a href={`/users/${userId}/settings`} style="background: #1976d2; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 3px;">
+          {"⚙️ User Settings"}
+        </a>
+        <a href="/users/456" style="background: #2e7d32; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 3px;">
+          {"👤 Switch to User 456"}
+        </a>
+      </div>
+    </div>
+
+    <div style="margin-top: 2rem;">
+      <h3>{"Parameter Routing Features:"}</h3>
+      <ul>
+        <li>{"✅ Dynamic route parameters"}</li>
+        <li>{"✅ Parameter access via api.location.params"}</li>
+        <li>{"✅ Regex pattern matching"}</li>
+        <li>{"✅ Nested parameter routes"}</li>
+      </ul>
+    </div>
+    </div>
+}
+
+component UserSettingsPage({ userId }: { userId: string }) {
+    <div>
+    <h1>{"⚙️ Settings for User: " + userId}</h1>
+    
+    <div style="background: #ffebee; border: 1px solid #f44336; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+      <p>{"🔒 This is a protected user settings page (requiresAuth: true)"}</p>
+      <p>{"User ID from route: " + userId}</p>
+    </div>
+
+    <div>
+      <h3>{"Settings Sections:"}</h3>
+      <ul style="list-style: none; padding: 0;">
+        <li style="padding: 0.5rem; background: #f5f5f5; margin: 0.25rem 0; border-radius: 3px;">{"📧 Email Preferences"}</li>
+        <li style="padding: 0.5rem; background: #f5f5f5; margin: 0.25rem 0; border-radius: 3px;">{"🔔 Notifications"}</li>
+        <li style="padding: 0.5rem; background: #f5f5f5; margin: 0.25rem 0; border-radius: 3px;">{"🔐 Privacy Settings"}</li>
+        <li style="padding: 0.5rem; background: #f5f5f5; margin: 0.25rem 0; border-radius: 3px;">{"💾 Data Management"}</li>
+      </ul>
+    </div>
+
+    <div style="margin-top: 2rem;">
+      <a href={`/users/${userId}`} style="background: #666; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 3px;">
+        {"← Back to Profile"}
+      </a>
+    </div>
+  </div>
+}
+
+component NotFoundPage() {
+  <div style="text-align: center; padding: 2rem;">
+    <h1 style="font-size: 4rem;">{"❌"}</h1>
+    <h2>{"404 - Page Not Found"}</h2>
+    <p>{"The page you're looking for doesn't exist."}</p>
+    
+    <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 1rem; margin: 2rem auto; border-radius: 4px; max-width: 500px;">
+      <p>{"This demonstrates the catch-all route pattern (*) for handling 404s."}</p>
+    </div>
+
+    <div style="margin-top: 2rem;">
+      <a href="/" style="background: #1976d2; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px;">
+        {"🏠 Go Home"}
+      </a>
+    </div>
+    </div>
+}

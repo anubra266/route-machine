@@ -1,0 +1,17 @@
+{
+  "name": "route-machine",
+  "version": "0.0.0",
+  "description": "Simple Agnostic Route Machine",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No test specified\"",
+    "site": "pnpm --filter=./site"
+  },
+  "keywords": [],
+  "author": "anubra266",
+  "license": "ISC",
+  "devDependencies": {
+    "tsup": "^8.3.5"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

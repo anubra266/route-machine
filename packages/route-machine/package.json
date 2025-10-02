@@ -1,0 +1,50 @@
+{
+  "name": "route-machine",
+  "version": "0.0.0",
+  "description": "A comprehensive router state machine for client-side navigation",
+  "keywords": [
+    "js",
+    "machine",
+    "xstate",
+    "statechart",
+    "component",
+    "zag-js",
+    "route-machine",
+    "routing"
+  ],
+  "author": "Abraham Aremu <anubra266@gmail.com>",
+  "homepage": "https://github.com/anubra266/route-machine#readme",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "repository": "https://github.com/anubra266/route-machine/tree/main/packages/route-machine",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint src",
+    "test": "echo \"No test specified\"",
+    "typecheck": "tsc --noEmit",
+    "prepack": "clean-package",
+    "postpack": "clean-package restore"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/anubra266i/route-machine/issues"
+  },
+  "clean-package": "./clean-package.config.json",
+  "dependencies": {
+    "@zag-js/anatomy": "latest",
+    "@zag-js/core": "latest",
+    "@zag-js/dom-query": "latest",
+    "@zag-js/types": "latest",
+    "@zag-js/utils": "latest",
+    "typescript": "~5.6.2"
+  },
+  "devDependencies": {
+    "clean-package": "2.2.0"
+  }
+}
