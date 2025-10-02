@@ -542,12 +542,9 @@ export const machine = createMachine<RouterSchema>({
                     const onBeforeNavigate = prop("onBeforeNavigate")
                     const pendingNav = context.get("pendingNavigation")
 
-                    console.log('🚀 [Initial Load Guard] Running guard for:', pendingNav?.to.pathname)
 
                     if (onBeforeNavigate && pendingNav) {
                         const result = onBeforeNavigate(pendingNav)
-
-                        console.log('🚀 [Initial Load Guard] Guard result:', result)
 
                         if (result === false) {
                             // Return false to prevent navigation - for initial load, redirect to fallback
