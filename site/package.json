@@ -18,7 +18,7 @@
 	"devDependencies": {
 		"prettier": "^3.6.2",
 		"prettier-plugin-ripple": "^0.2.29",
-		"route-machine": "workspace:*",
+		"routing-machine": "workspace:*",
 		"typescript": "^5.9.2",
 		"vite": "^7.1.4",
 		"vite-plugin-ripple": "^0.2.29",

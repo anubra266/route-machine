@@ -1,4 +1,4 @@
-# route-machine
+# routing-machine
 
 A comprehensive router state machine for client-side navigation.
 
@@ -40,13 +40,13 @@ A comprehensive router state machine for client-side navigation.
 ## Installation
 
 ```bash
-npm install route-machine
+npm install routing-machine
 ```
 
 ## Quick Start
 
 ```typescript
-import * as router from "route-machine"
+import * as router from "routing-machine"
 import { normalizeProps, useMachine } from "@zag-js/react"
 
 export function useRouter(options = {}) {
@@ -96,7 +96,7 @@ router.location = {
   query: { tab: "profile" }, // Parsed query parameters
   meta: { requiresAuth: true }, // Route metadata
   name: "user", // Route name
-}
+};
 ```
 
 ### Navigation Sources & Types
@@ -105,17 +105,17 @@ All navigation is categorized by source and type:
 
 ```typescript
 // Navigation sources
-"initial" // Page load, refresh, direct URL
-"programmatic" // router.push(), router.navigate()
-"user" // Link clicks (getLinkProps)
-"browser" // Browser back/forward buttons
+"initial"; // Page load, refresh, direct URL
+"programmatic"; // router.push(), router.navigate()
+"user"; // Link clicks (getLinkProps)
+"browser"; // Browser back/forward buttons
 
 // Navigation types
-"initial" // Initial page load
-"push" // Add new history entry
-"replace" // Replace current history entry
-"back" // Go back in history
-"forward" // Go forward in history
+"initial"; // Initial page load
+"push"; // Add new history entry
+"replace"; // Replace current history entry
+"back"; // Go back in history
+"forward"; // Go forward in history
 ```
 
 ## Route Patterns
@@ -127,7 +127,7 @@ const routes = [
   { path: "/", name: "home" },
   { path: "/about", name: "about" },
   { path: "/contact", name: "contact" },
-]
+];
 ```
 
 ### Parameterized Routes
@@ -137,12 +137,12 @@ const routes = [
   { path: "/users/:id", name: "user" },
   { path: "/posts/:slug", name: "post" },
   { path: "/api/:version/docs", name: "api-docs" },
-]
+];
 
 // Access parameters
-router.location.params.id // "123"
-router.location.params.slug // "hello-world"
-router.location.params.version // "v2"
+router.location.params.id; // "123"
+router.location.params.slug; // "hello-world"
+router.location.params.version; // "v2"
 ```
 
 ### Catch-All Routes
@@ -173,27 +173,27 @@ const routes = [
 ### Programmatic Navigation
 
 ```typescript
-const router = useRouter()
+const router = useRouter();
 
 // Add to history (most common)
-router.push("/about")
-router.push("/users/456", { from: "search" })
+router.push("/about");
+router.push("/users/456", { from: "search" });
 
 // Replace current entry
-router.replace("/login")
-router.replace("/home", { replaced: true })
+router.replace("/login");
+router.replace("/home", { replaced: true });
 
 // Navigate with options
 router.navigate("/search", {
   replace: false,
   state: { searchSource: "header" },
-})
+});
 
 // History navigation
-router.back() // Go back one step
-router.forward() // Go forward one step
-router.go(-2) // Go back 2 steps
-router.go(3) // Go forward 3 steps
+router.back(); // Go back one step
+router.forward(); // Go forward one step
+router.go(-2); // Go back 2 steps
+router.go(3); // Go forward 3 steps
 ```
 
 ### Link Navigation
@@ -219,20 +219,20 @@ router.go(3) // Go forward 3 steps
 ### Navigation State
 
 ```typescript
-const router = useRouter()
+const router = useRouter();
 
 // Current state
-router.location // Full location object
-router.previousLocation // Previous location (or null)
-router.navigating // Boolean: navigation in progress
+router.location; // Full location object
+router.previousLocation; // Previous location (or null)
+router.navigating; // Boolean: navigation in progress
 
 // History state
-router.canGoBack // Boolean: can go back
-router.canGoForward // Boolean: can go forward
+router.canGoBack; // Boolean: can go back
+router.canGoForward; // Boolean: can go forward
 
 // Route info
-router.currentRouteName // Current route name
-router.currentRouteMeta // Current route metadata
+router.currentRouteName; // Current route name
+router.currentRouteMeta; // Current route metadata
 ```
 
 ## Navigation Guards
@@ -245,12 +245,12 @@ and authorization.
 ```typescript
 const router = useRouter({
   onBeforeNavigate: (details) => {
-    return false // Block navigation
-    return "/login" // Redirect to different route
-    return true // Explicitly allow
-    return undefined // Implicitly allow (default)
+    return false; // Block navigation
+    return "/login"; // Redirect to different route
+    return true; // Explicitly allow
+    return undefined; // Implicitly allow (default)
   },
-})
+});
 ```
 
 ### Authentication Guards
@@ -260,28 +260,32 @@ const router = useRouter({
   routes: [
     { path: "/", name: "home", meta: { public: true } },
     { path: "/profile", name: "profile", meta: { requiresAuth: true } },
-    { path: "/admin", name: "admin", meta: { requiresAuth: true, role: "admin" } },
+    {
+      path: "/admin",
+      name: "admin",
+      meta: { requiresAuth: true, role: "admin" },
+    },
     { path: "/login", name: "login", meta: { guestOnly: true } },
   ],
   onBeforeNavigate: (details) => {
     // Guest-only pages (redirect authenticated users)
     if (details.to.meta?.guestOnly && isAuthenticated()) {
-      return "/profile"
+      return "/profile";
     }
 
     // Protected pages (redirect unauthenticated users)
     if (details.to.meta?.requiresAuth && !isAuthenticated()) {
-      return "/login"
+      return "/login";
     }
 
     // Role-based access
     if (details.to.meta?.role && !hasRole(details.to.meta.role)) {
-      return "/access-denied"
+      return "/access-denied";
     }
 
     // Allow navigation
   },
-})
+});
 ```
 
 ### Form Protection Guards
@@ -295,13 +299,13 @@ const router = useRouter({
   onBeforeNavigate: (details) => {
     // Warn about unsaved changes
     if (details.from?.meta?.hasForm && hasUnsavedChanges()) {
-      const shouldLeave = confirm("You have unsaved changes. Continue?")
+      const shouldLeave = confirm("You have unsaved changes. Continue?");
       if (!shouldLeave) {
-        return false // User chose to stay
+        return false; // User chose to stay
       }
     }
   },
-})
+});
 ```
 
 ### Navigation Context
@@ -321,8 +325,8 @@ onBeforeNavigate: (details) => {
     toRoute: details.to.name, // "user-settings"
     fromMeta: details.from?.meta, // { requiresAuth: true }
     toMeta: details.to.meta, // { requiresAuth: true, hasForm: true }
-  })
-}
+  });
+};
 ```
 
 ## Route Metadata
@@ -355,25 +359,25 @@ const routes = [
       breadcrumb: (params) => `User ${params.id} Settings`,
     },
   },
-]
+];
 ```
 
 ### Accessing Metadata
 
 ```typescript
 // In components
-router.location.meta.title // "Dashboard"
-router.location.meta.requiresAuth // true
-router.location.meta.layout // "app"
+router.location.meta.title; // "Dashboard"
+router.location.meta.requiresAuth; // true
+router.location.meta.layout; // "app"
 
 // In navigation callbacks
 onNavigate: (details) => {
-  document.title = details.to.meta?.title || "App"
+  document.title = details.to.meta?.title || "App";
 
   if (details.to.meta?.analytics) {
-    analytics.track("page_view", details.to.meta.analytics)
+    analytics.track("page_view", details.to.meta.analytics);
   }
-}
+};
 ```
 
 ### Layout-Based Rendering
@@ -403,13 +407,13 @@ function App() {
 const router = useRouter({
   onNavigationStart: (details) => {
     // Called when navigation begins
-    setGlobalLoading(true)
-    console.log(`Starting navigation to ${details.to.pathname}`)
+    setGlobalLoading(true);
+    console.log(`Starting navigation to ${details.to.pathname}`);
   },
 
   onNavigate: (details) => {
     // Called after successful navigation
-    document.title = details.to.meta?.title || "App"
+    document.title = details.to.meta?.title || "App";
 
     // Analytics tracking
     analytics.track("page_view", {
@@ -418,25 +422,27 @@ const router = useRouter({
       title: details.to.meta?.title,
       fromRoute: details.from?.name,
       navigationType: details.type,
-    })
+    });
   },
 
   onNavigationEnd: (details) => {
     // Called when navigation fully completes
-    setGlobalLoading(false)
+    setGlobalLoading(false);
 
     // Scroll management
     if (details.to.meta?.scrollToElement) {
-      document.getElementById(details.to.meta.scrollToElement)?.scrollIntoView()
+      document
+        .getElementById(details.to.meta.scrollToElement)
+        ?.scrollIntoView();
     }
   },
 
   onNavigationError: (error, details) => {
     // Called when navigation fails
-    console.error("Navigation error:", error.message)
-    showErrorToast(`Failed to navigate to ${details?.to?.pathname}`)
+    console.error("Navigation error:", error.message);
+    showErrorToast(`Failed to navigate to ${details?.to?.pathname}`);
   },
-})
+});
 ```
 
 ### Loading States
@@ -477,28 +483,28 @@ function App() {
 
 ```typescript
 // URL: /search?q=javascript&tags=react&tags=vue&category=tutorial
-const router = useRouter()
+const router = useRouter();
 
-router.location.search // "?q=javascript&tags=react&tags=vue&category=tutorial"
-router.location.query.q // "javascript"
-router.location.query.tags // ["react", "vue"]
-router.location.query.category // "tutorial"
+router.location.search; // "?q=javascript&tags=react&tags=vue&category=tutorial"
+router.location.query.q; // "javascript"
+router.location.query.tags; // ["react", "vue"]
+router.location.query.category; // "tutorial"
 ```
 
 ### Navigating with Query Parameters
 
 ```typescript
 // Set query parameters
-router.push("/search?q=typescript&sort=date")
-router.navigate("/products?category=electronics&price=100-500")
+router.push("/search?q=typescript&sort=date");
+router.navigate("/products?category=electronics&price=100-500");
 
 // Preserve existing parameters
-const currentQuery = new URLSearchParams(router.location.search)
-currentQuery.set("page", "2")
-router.push(`/products?${currentQuery.toString()}`)
+const currentQuery = new URLSearchParams(router.location.search);
+currentQuery.set("page", "2");
+router.push(`/products?${currentQuery.toString()}`);
 
 // Clear query parameters
-router.push("/search") // No query string = cleared
+router.push("/search"); // No query string = cleared
 ```
 
 ## Active Route Detection
@@ -506,15 +512,15 @@ router.push("/search") // No query string = cleared
 ### Basic Active Detection
 
 ```typescript
-const router = useRouter()
+const router = useRouter();
 
 // Exact match
-router.isActive("/") // true only for exact "/"
-router.isActive("/about") // true only for exact "/about"
+router.isActive("/"); // true only for exact "/"
+router.isActive("/about"); // true only for exact "/about"
 
 // Prefix match (exact=false)
-router.isActive("/users", false) // true for "/users", "/users/123", "/users/123/settings"
-router.isActive("/admin", false) // true for any "/admin/*" route
+router.isActive("/users", false); // true for "/users", "/users/123", "/users/123/settings"
+router.isActive("/admin", false); // true for any "/admin/*" route
 ```
 
 ### Active Link Styling
@@ -563,7 +569,7 @@ For static hosting environments that don't support history API:
 const router = useRouter({
   hashRouting: true, // Use #/path instead of /path
   basePath: "/app", // Optional base path
-})
+});
 
 // URLs become: https://example.com/app#/users/123
 ```
@@ -575,7 +581,7 @@ For deploying in subdirectories:
 ```typescript
 const router = useRouter({
   basePath: "/my-app", // App deployed at /my-app
-})
+});
 
 // Routes work correctly:
 // /my-app/ → matches "/"
@@ -588,7 +594,7 @@ const router = useRouter({
 const router = useRouter({
   scrollToTop: true, // Scroll to top on navigation (default: true)
   scrollRestoration: "manual", // Browser scroll restoration (default: "auto")
-})
+});
 ```
 
 ## Nested Routes
@@ -600,18 +606,46 @@ While the router uses flat route definitions, you can achieve nested behavior us
 ```typescript
 const routes = [
   // Parent routes
-  { path: "/users", name: "users-index", meta: { layout: "users", section: "index" } },
-  { path: "/admin", name: "admin-index", meta: { layout: "admin", section: "index" } },
+  {
+    path: "/users",
+    name: "users-index",
+    meta: { layout: "users", section: "index" },
+  },
+  {
+    path: "/admin",
+    name: "admin-index",
+    meta: { layout: "admin", section: "index" },
+  },
 
   // Child routes with full paths
-  { path: "/users/:id", name: "user-profile", meta: { layout: "users", section: "detail", tab: "profile" } },
-  { path: "/users/:id/settings", name: "user-settings", meta: { layout: "users", section: "detail", tab: "settings" } },
-  { path: "/users/:id/posts", name: "user-posts", meta: { layout: "users", section: "detail", tab: "posts" } },
+  {
+    path: "/users/:id",
+    name: "user-profile",
+    meta: { layout: "users", section: "detail", tab: "profile" },
+  },
+  {
+    path: "/users/:id/settings",
+    name: "user-settings",
+    meta: { layout: "users", section: "detail", tab: "settings" },
+  },
+  {
+    path: "/users/:id/posts",
+    name: "user-posts",
+    meta: { layout: "users", section: "detail", tab: "posts" },
+  },
 
   // Admin child routes
-  { path: "/admin/users", name: "admin-users", meta: { layout: "admin", section: "users" } },
-  { path: "/admin/settings", name: "admin-settings", meta: { layout: "admin", section: "settings" } },
-]
+  {
+    path: "/admin/users",
+    name: "admin-users",
+    meta: { layout: "admin", section: "users" },
+  },
+  {
+    path: "/admin/settings",
+    name: "admin-settings",
+    meta: { layout: "admin", section: "settings" },
+  },
+];
 ```
 
 ### Layout Components
@@ -670,48 +704,84 @@ function useAuthenticatedRouter() {
       // Public routes
       { path: "/", name: "home", meta: { title: "Home", public: true } },
       { path: "/about", name: "about", meta: { title: "About", public: true } },
-      { path: "/login", name: "login", meta: { title: "Login", guestOnly: true } },
-      { path: "/register", name: "register", meta: { title: "Register", guestOnly: true } },
+      {
+        path: "/login",
+        name: "login",
+        meta: { title: "Login", guestOnly: true },
+      },
+      {
+        path: "/register",
+        name: "register",
+        meta: { title: "Register", guestOnly: true },
+      },
 
       // Protected routes
-      { path: "/profile", name: "profile", meta: { title: "Profile", requiresAuth: true } },
-      { path: "/settings", name: "settings", meta: { title: "Settings", requiresAuth: true, hasForm: true } },
+      {
+        path: "/profile",
+        name: "profile",
+        meta: { title: "Profile", requiresAuth: true },
+      },
+      {
+        path: "/settings",
+        name: "settings",
+        meta: { title: "Settings", requiresAuth: true, hasForm: true },
+      },
 
       // Admin routes
-      { path: "/admin", name: "admin", meta: { title: "Admin", requiresAuth: true, role: "admin" } },
-      { path: "/admin/users", name: "admin-users", meta: { title: "Manage Users", requiresAuth: true, role: "admin" } },
+      {
+        path: "/admin",
+        name: "admin",
+        meta: { title: "Admin", requiresAuth: true, role: "admin" },
+      },
+      {
+        path: "/admin/users",
+        name: "admin-users",
+        meta: { title: "Manage Users", requiresAuth: true, role: "admin" },
+      },
 
       // Error routes
-      { path: "/access-denied", name: "access-denied", meta: { title: "Access Denied", public: true } },
-      { path: "*", name: "not-found", meta: { title: "Page Not Found", public: true } },
+      {
+        path: "/access-denied",
+        name: "access-denied",
+        meta: { title: "Access Denied", public: true },
+      },
+      {
+        path: "*",
+        name: "not-found",
+        meta: { title: "Page Not Found", public: true },
+      },
     ],
 
     onBeforeNavigate: (details) => {
-      const { to, from, type } = details
+      const { to, from, type } = details;
 
-      console.log(`🚀 Navigation: ${from?.name || "initial"} → ${to.name} (${type})`)
+      console.log(
+        `🚀 Navigation: ${from?.name || "initial"} → ${to.name} (${type})`
+      );
 
       // Guest-only redirect (login page when already authenticated)
       if (to.meta?.guestOnly && isAuthenticated()) {
-        return "/profile"
+        return "/profile";
       }
 
       // Authentication required
       if (to.meta?.requiresAuth && !isAuthenticated()) {
         // Save intended destination
-        sessionStorage.setItem("redirectAfterLogin", to.pathname)
-        return "/login"
+        sessionStorage.setItem("redirectAfterLogin", to.pathname);
+        return "/login";
       }
 
       // Role-based authorization
       if (to.meta?.role && !hasRole(to.meta.role)) {
-        return "/access-denied"
+        return "/access-denied";
       }
 
       // Form protection
       if (from?.meta?.hasForm && hasUnsavedChanges()) {
-        const shouldLeave = confirm(`You have unsaved changes. Leave ${from.meta?.title}?`)
-        return shouldLeave ? undefined : false
+        const shouldLeave = confirm(
+          `You have unsaved changes. Leave ${from.meta?.title}?`
+        );
+        return shouldLeave ? undefined : false;
       }
 
       // Allow navigation
@@ -719,10 +789,10 @@ function useAuthenticatedRouter() {
 
     onNavigate: (details) => {
       // Update document title
-      document.title = details.to.meta?.title + " | MyApp"
+      document.title = details.to.meta?.title + " | MyApp";
 
       // Clear any error states
-      clearErrors()
+      clearErrors();
 
       // Analytics tracking
       analytics.track("page_view", {
@@ -733,35 +803,35 @@ function useAuthenticatedRouter() {
         userRole: getCurrentUserRole(),
         fromRoute: details.from?.name,
         navigationType: details.type,
-      })
+      });
 
       // Handle post-login redirect
       if (details.to.name === "login" && details.type === "initial") {
-        const redirectPath = sessionStorage.getItem("redirectAfterLogin")
+        const redirectPath = sessionStorage.getItem("redirectAfterLogin");
         if (redirectPath) {
-          sessionStorage.removeItem("redirectAfterLogin")
-          setTimeout(() => router.replace(redirectPath), 100)
+          sessionStorage.removeItem("redirectAfterLogin");
+          setTimeout(() => router.replace(redirectPath), 100);
         }
       }
     },
 
     onNavigationStart: (details) => {
-      setGlobalLoading(true)
+      setGlobalLoading(true);
 
       // Different loading states based on route
-      const loadingType = details.to.meta?.loadingType || "default"
-      setLoadingType(loadingType)
+      const loadingType = details.to.meta?.loadingType || "default";
+      setLoadingType(loadingType);
     },
 
     onNavigationEnd: (details) => {
-      setGlobalLoading(false)
+      setGlobalLoading(false);
 
       // Focus management for accessibility
       if (details.to.meta?.focusElement) {
-        document.querySelector(details.to.meta.focusElement)?.focus()
+        document.querySelector(details.to.meta.focusElement)?.focus();
       }
     },
-  })
+  });
 }
 ```
 
@@ -874,9 +944,9 @@ function App() {
 
 ```typescript
 interface RouteDefinition {
-  path: string // Route pattern: "/", "/users/:id", "/admin/*", "*"
-  name?: string // Route identifier: "home", "user", "not-found"
-  meta?: Record<string, any> // Custom metadata: { title: "Home", requiresAuth: true }
+  path: string; // Route pattern: "/", "/users/:id", "/admin/*", "*"
+  name?: string; // Route identifier: "home", "user", "not-found"
+  meta?: Record<string, any>; // Custom metadata: { title: "Home", requiresAuth: true }
 }
 ```
 
@@ -884,13 +954,13 @@ interface RouteDefinition {
 
 ```typescript
 interface RouteLocation {
-  pathname: string // "/users/123"
-  search: string // "?tab=settings"
-  hash: string // "#section1"
-  params: Record<string, string> // { id: "123" }
-  query: Record<string, string | string[]> // { tab: "settings", tags: ["react", "vue"] }
-  meta?: Record<string, any> // { title: "Profile", requiresAuth: true }
-  name?: string // "user"
+  pathname: string; // "/users/123"
+  search: string; // "?tab=settings"
+  hash: string; // "#section1"
+  params: Record<string, string>; // { id: "123" }
+  query: Record<string, string | string[]>; // { tab: "settings", tags: ["react", "vue"] }
+  meta?: Record<string, any>; // { title: "Profile", requiresAuth: true }
+  name?: string; // "user"
 }
 ```
 
@@ -898,26 +968,26 @@ interface RouteLocation {
 
 ```typescript
 interface NavigationDetails {
-  from: RouteLocation | null // Source location (null for initial loads)
-  to: RouteLocation // Target location
-  type: NavigationType // "initial" | "push" | "replace" | "back" | "forward"
-  source?: NavigationSource // "initial" | "programmatic" | "user" | "browser"
+  from: RouteLocation | null; // Source location (null for initial loads)
+  to: RouteLocation; // Target location
+  type: NavigationType; // "initial" | "push" | "replace" | "back" | "forward"
+  source?: NavigationSource; // "initial" | "programmatic" | "user" | "browser"
 }
 
-type NavigationType = "initial" | "push" | "replace" | "back" | "forward"
-type NavigationSource = "initial" | "programmatic" | "user" | "browser"
+type NavigationType = "initial" | "push" | "replace" | "back" | "forward";
+type NavigationSource = "initial" | "programmatic" | "user" | "browser";
 ```
 
 ### LinkProps Interface
 
 ```typescript
 interface LinkProps {
-  to: string // Target path: "/about", "/users/123"
-  replace?: boolean // Use replace instead of push (default: false)
-  state?: any // Navigation state data
-  target?: string // Link target: "_blank", "_self"
-  rel?: string // Link relationship: "external", "noopener"
-  preventDefault?: boolean // Prevent default click behavior (default: false)
+  to: string; // Target path: "/about", "/users/123"
+  replace?: boolean; // Use replace instead of push (default: false)
+  state?: any; // Navigation state data
+  target?: string; // Link target: "_blank", "_self"
+  rel?: string; // Link relationship: "external", "noopener"
+  preventDefault?: boolean; // Prevent default click behavior (default: false)
 }
 ```
 
@@ -945,7 +1015,7 @@ const routes = [
 
   // Global catch-all last
   { path: "*", name: "not-found" },
-]
+];
 ```
 
 ### Route Metadata Best Practices
@@ -976,7 +1046,7 @@ const routes = [
       hasForm: false,
     },
   },
-]
+];
 ```
 
 ### Error Handling
@@ -985,21 +1055,21 @@ const routes = [
 const router = useRouter({
   onNavigationError: (error, details) => {
     // Log for debugging
-    console.error("Navigation error:", error.message, details)
+    console.error("Navigation error:", error.message, details);
 
     // Show user-friendly error
     if (error.message.includes("prevented")) {
       // Navigation was blocked by guard - handle gracefully
-      showToast("Navigation blocked", "info")
+      showToast("Navigation blocked", "info");
     } else {
       // Unexpected error
-      showToast("Navigation failed", "error")
+      showToast("Navigation failed", "error");
 
       // Fallback navigation
-      router.push("/")
+      router.push("/");
     }
   },
-})
+});
 ```
 
 ### Performance Optimization
@@ -1008,19 +1078,23 @@ const router = useRouter({
 // ✅ Good: Lazy load route components
 const routes = [
   { path: "/", name: "home", meta: { component: () => import("./Home") } },
-  { path: "/heavy-page", name: "heavy", meta: { component: () => import("./HeavyPage") } },
-]
+  {
+    path: "/heavy-page",
+    name: "heavy",
+    meta: { component: () => import("./HeavyPage") },
+  },
+];
 
 // ✅ Good: Debounce rapid navigation
-let navigationTimeout
+let navigationTimeout;
 const router = useRouter({
   onBeforeNavigate: (details) => {
-    clearTimeout(navigationTimeout)
+    clearTimeout(navigationTimeout);
     navigationTimeout = setTimeout(() => {
       // Handle navigation after debounce
-    }, 50)
+    }, 50);
   },
-})
+});
 ```
 
 > ReadME mostly generated by AI. 😉

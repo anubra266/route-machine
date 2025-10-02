@@ -1,5 +1,5 @@
 {
-  "name": "route-machine",
+  "name": "routing-machine",
   "version": "0.0.0",
   "description": "Simple Agnostic Route Machine",
   "main": "index.js",

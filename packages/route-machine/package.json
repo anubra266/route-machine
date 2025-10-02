@@ -1,5 +1,5 @@
 {
-  "name": "route-machine",
+  "name": "routing-machine",
   "version": "0.0.0",
   "description": "A comprehensive router state machine for client-side navigation",
   "keywords": [
@@ -9,14 +9,14 @@
     "statechart",
     "component",
     "zag-js",
-    "route-machine",
+    "routing-machine",
     "routing"
   ],
   "author": "Abraham Aremu <anubra266@gmail.com>",
-  "homepage": "https://github.com/anubra266/route-machine#readme",
+  "homepage": "https://github.com/anubra266/routing-machine#readme",
   "license": "MIT",
   "main": "src/index.ts",
-  "repository": "https://github.com/anubra266/route-machine/tree/main/packages/route-machine",
+  "repository": "https://github.com/anubra266/routing-machine/tree/main/packages/routing-machine",
   "sideEffects": false,
   "files": [
     "dist"
@@ -33,7 +33,7 @@
     "access": "public"
   },
   "bugs": {
-    "url": "https://github.com/anubra266i/route-machine/issues"
+    "url": "https://github.com/anubra266i/routing-machine/issues"
   },
   "clean-package": "./clean-package.config.json",
   "dependencies": {
