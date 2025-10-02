@@ -8,9 +8,7 @@ export default defineConfig({
 	},
 	build: {
 		target: 'esnext',
+		outDir: "site-build",
 	},
 	base: "./",
-	build: {
-	  outDir: "site-build",
-	},
 });

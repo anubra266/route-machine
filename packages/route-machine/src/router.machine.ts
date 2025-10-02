@@ -24,7 +24,7 @@ export const machine = createMachine<RouterSchema>({
     },
 
     context({ prop, bindable }) {
-        const initialLocation = getInitialLocation(prop("initialLocation"), prop("basePath"), prop("hashRouting"))
+        const initialLocation = getInitialLocation(prop("initialLocation"), prop("basePath"), prop("hashRouting"), prop("routes"))
 
         return {
             location: bindable<RouteLocation>(() => ({
@@ -625,10 +625,11 @@ export const machine = createMachine<RouterSchema>({
 function getInitialLocation(
     initialLocation: Partial<RouteLocation> | undefined,
     basePath: string,
-    _hashRouting: boolean
+    _hashRouting: boolean,
+    routes?: RouteDefinition[]
 ): RouteLocation {
     if (initialLocation) {
-        return {
+        const location = {
             pathname: "/",
             search: "",
             hash: "",
@@ -636,6 +637,16 @@ function getInitialLocation(
             query: {},
             ...initialLocation,
         }
+
+        // Extract route parameters immediately if routes are available
+        if (routes) {
+            const matchedRoute = findRouteByLocation(location, routes)
+            if (matchedRoute) {
+                location.params = dom.extractParams(location.pathname, matchedRoute.path)
+            }
+        }
+
+        return enrichLocationWithMeta(location, routes)
     }
 
     if (typeof window === "undefined") {
@@ -648,7 +659,17 @@ function getInitialLocation(
         }
     }
 
-    return dom.parseUrl(window.location.href, basePath)
+    const location = dom.parseUrl(window.location.href, basePath)
+
+    // Extract route parameters immediately if routes are available
+    if (routes) {
+        const matchedRoute = findRouteByLocation(location, routes)
+        if (matchedRoute) {
+            location.params = dom.extractParams(location.pathname, matchedRoute.path)
+        }
+    }
+
+    return enrichLocationWithMeta(location, routes)
 }
 
 function createNavigationTarget(
