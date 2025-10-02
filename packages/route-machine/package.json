@@ -1,6 +1,6 @@
 {
   "name": "routing-machine",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A comprehensive router state machine for client-side navigation",
   "keywords": [
     "js",
