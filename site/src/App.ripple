@@ -2,6 +2,8 @@ import { track, effect } from 'ripple';
 import * as router from "routing-machine"
 import { normalizeProps, useMachine } from "zag-ripple"
 
+const basePath = "/routing-machine/"
+
 export component App() {
   // State for testing various router features
   const isAuthenticated = track(false)
@@ -22,7 +24,7 @@ export component App() {
     router.machine,{
       id: "app-router",
       hashRouting: useHashRouting, // Toggle between hash and history routing
-      basePath: "/routing-machine/", // Can be set for subdirectory deployment
+      basePath, // Can be set for subdirectory deployment
       routes: [
         { path: "/", name: "home", meta: { title: "Home", requiresAuth: false } },
         { path: "/about", name: "about", meta: { title: "About", requiresAuth: false } },
@@ -347,9 +349,9 @@ component HomePage() {
     <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
       <h3>{"Quick Navigation Tests:"}</h3>
       <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <a href="/search?q=homepage&source=home" style="color: #1976d2;">{"🔍 Search with Query"}</a>
-        <a href="/users/789" style="color: #1976d2;">{"👤 User 789"}</a>
-        <a href="/admin" style="color: #1976d2;">{"🔒 Admin (Protected)"}</a>
+        <a href={basePath + "/search?q=homepage&source=home"} style="color: #1976d2;">{"🔍 Search with Query"}</a>
+        <a href={basePath + "/users/789"} style="color: #1976d2;">{"👤 User 789"}</a>
+        <a href={basePath + "/admin"} style="color: #1976d2;">{"🔒 Admin (Protected)"}</a>
       </div>
     </div>
 
@@ -406,17 +408,17 @@ component SearchPage({ query }: { query: Record<string, any> }) {
           </ul>
         </div>
       } else {
-        <p>{"No query parameters found. Try: "}<a href="/search?q=test&category=demo&tags=router&tags=ripple" style="color: #1976d2;">{"Search with multiple params"}</a></p>
+        <p>{"No query parameters found. Try: "}<a href={basePath + "/search?q=test&category=demo&tags=router&tags=ripple"} style="color: #1976d2;">{"Search with multiple params"}</a></p>
       }
     </div>
 
     <div>
       <h3>{"Test Different Query Combinations:"}</h3>
       <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-        <a href="/search?q=ripple" style="color: #1976d2;">{"Single param"}</a>
-        <a href="/search?q=router&framework=ripple" style="color: #1976d2;">{"Multiple params"}</a>
-        <a href="/search?tags=frontend&tags=routing&tags=zag" style="color: #1976d2;">{"Array params"}</a>
-        <a href="/search?q=test&page=2&sort=date&order=desc" style="color: #1976d2;">{"Complex query"}</a>
+        <a href={basePath + "/search?q=ripple"} style="color: #1976d2;">{"Single param"}</a>
+        <a href={basePath + "/search?q=router&framework=ripple"} style="color: #1976d2;">{"Multiple params"}</a>
+        <a href={basePath + "/search?tags=frontend&tags=routing&tags=zag"} style="color: #1976d2;">{"Array params"}</a>
+        <a href={basePath + "/search?q=test&page=2&sort=date&order=desc"} style="color: #1976d2;">{"Complex query"}</a>
       </div>
     </div>
   </div>
@@ -441,7 +443,7 @@ component LoginPage({ onLogin }: { onLogin: () => void }) {
     <div>
       <h3>{"Test Authentication Flow:"}</h3>
       <ol>
-        <li>{"Try clicking "}<a href="/admin" style="color: #1976d2;">{"Admin"}</a>{" or "}<a href="/protected" style="color: #1976d2;">{"Protected"}</a>{" (should be blocked)"}</li>
+        <li>{"Try clicking "}<a href={basePath + "/admin"} style="color: #1976d2;">{"Admin"}</a>{" or "}<a href={basePath + "/protected"} style="color: #1976d2;">{"Protected"}</a>{" (should be blocked)"}</li>
         <li>{"Click the Login button above"}</li>
         <li>{"Now try the protected routes again (should work)"}</li>
       </ol>
@@ -460,8 +462,8 @@ component AdminPage() {
     <div>
       <h3>{"Admin Navigation:"}</h3>
       <ul>
-        <li><a href="/admin/users" style="color: #1976d2;">{"👥 Manage Users"}</a></li>
-        <li><a href="/protected" style="color: #1976d2;">{"🛡️ Other Protected Area"}</a></li>
+        <li><a href={basePath + "/admin/users"} style="color: #1976d2;">{"👥 Manage Users"}</a></li>
+        <li><a href={basePath + "/protected"} style="color: #1976d2;">{"🛡️ Other Protected Area"}</a></li>
       </ul>
     </div>
 
@@ -489,13 +491,13 @@ component AdminUsersPage() {
     <div>
       <h3>{"Sample User List:"}</h3>
       <div style="display: grid; gap: 0.5rem; margin-top: 1rem;">
-        <a href="/users/101" style="padding: 0.5rem; background: #f5f5f5; color: #1976d2; text-decoration: none; border-radius: 3px;">
+        <a href={basePath + "/users/101"} style="padding: 0.5rem; background: #f5f5f5; color: #1976d2; text-decoration: none; border-radius: 3px;">
           {"👤 User 101 - John Doe"}
         </a>
-        <a href="/users/102" style="padding: 0.5rem; background: #f5f5f5; color: #1976d2; text-decoration: none; border-radius: 3px;">
+        <a href={basePath + "/users/102"} style="padding: 0.5rem; background: #f5f5f5; color: #1976d2; text-decoration: none; border-radius: 3px;">
           {"👤 User 102 - Jane Smith"}
         </a>
-        <a href="/users/103/settings" style="padding: 0.5rem; background: #f5f5f5; color: #1976d2; text-decoration: none; border-radius: 3px;">
+        <a href={basePath + "/users/103/settings"} style="padding: 0.5rem; background: #f5f5f5; color: #1976d2; text-decoration: none; border-radius: 3px;">
           {"⚙️ User 103 Settings - Direct Link"}
         </a>
       </div>
@@ -537,10 +539,10 @@ component UserPage({ userId }: { userId: string }) {
     <div>
       <h3>{"User Actions:"}</h3>
       <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-        <a href={`/users/${userId}/settings`} style="background: #1976d2; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 3px;">
+        <a href={`${basePath}/users/${userId}/settings`} style="background: #1976d2; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 3px;">
           {"⚙️ User Settings"}
         </a>
-        <a href="/users/456" style="background: #2e7d32; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 3px;">
+        <a href={basePath + "/users/456"} style="background: #2e7d32; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 3px;">
           {"👤 Switch to User 456"}
         </a>
       </div>
@@ -578,7 +580,7 @@ component UserSettingsPage({ userId }: { userId: string }) {
     </div>
 
     <div style="margin-top: 2rem;">
-      <a href={`/users/${userId}`} style="background: #666; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 3px;">
+      <a href={`${basePath}/users/${userId}`} style="background: #666; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 3px;">
         {"← Back to Profile"}
       </a>
     </div>
@@ -596,7 +598,7 @@ component NotFoundPage() {
     </div>
 
     <div style="margin-top: 2rem;">
-      <a href="/" style="background: #1976d2; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px;">
+      <a href={basePath + "/"} style="background: #1976d2; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px;">
         {"🏠 Go Home"}
       </a>
     </div>
