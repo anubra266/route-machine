@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"No test specified\"",
-    "site": "pnpm --filter=./site"
+    "site": "pnpm --filter=./site",
+    "build": "pnpm --filter=./packages/route-machine build",
+    "publish": "pnpm --filter=./packages/route-machine publish",
+    "release": "pnpm build && pnpm publish"
   },
   "keywords": [],
   "author": "anubra266",
