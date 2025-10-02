@@ -344,7 +344,7 @@ export component App() {
 component HomePage() {
   <div>
     <h1>{"🏠 Home Page"}</h1>
-    <p>{"Welcome to the comprehensive @zag-js/router demo in Ripple!"}</p>
+    <p>{"Welcome to the comprehensive routing-machine demo in Ripple!"}</p>
     
     <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
       <h3>{"Quick Navigation Tests:"}</h3>
@@ -375,7 +375,7 @@ component HomePage() {
 component AboutPage() {
     <div>
     <h1>{"ℹ️ About Page"}</h1>
-    <p>{"This page demonstrates @zag-js/router integration with Ripple framework."}</p>
+    <p>{"This page demonstrates routing-machine integration with Ripple framework."}</p>
     
     <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
       <h3>{"Router Features:"}</h3>
