@@ -22,7 +22,7 @@ export component App() {
     router.machine,{
       id: "app-router",
       hashRouting: useHashRouting, // Toggle between hash and history routing
-      basePath: "", // Can be set for subdirectory deployment
+      basePath: "routing-machine", // Can be set for subdirectory deployment
       routes: [
         { path: "/", name: "home", meta: { title: "Home", requiresAuth: false } },
         { path: "/about", name: "about", meta: { title: "About", requiresAuth: false } },
