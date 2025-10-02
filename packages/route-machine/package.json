@@ -44,7 +44,7 @@
     "@zag-js/utils": "latest"
   },
   "devDependencies": {
-    "clean-package": "2.2.0"
+    "clean-package": "2.2.0",
     "typescript": "~5.6.2"
   }
 }
